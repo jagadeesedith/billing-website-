@@ -1,0 +1,21 @@
+{
+  "name": "roadstop-billing",
+  "version": "1.0.0",
+  "description": "RoadStop Hotel Billing App",
+  "main": "index.html",
+  "scripts": {
+    "build":   "echo 'No build step needed — static HTML app'",
+    "sync":    "npx cap sync android",
+    "copy":    "npx cap copy android",
+    "open":    "npx cap open android",
+    "run":     "npx cap run android",
+    "apk":     "cd android && gradlew.bat assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^5.7.0",
+    "@capacitor/core":    "^5.7.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli":    "^5.7.0"
+  }
+}

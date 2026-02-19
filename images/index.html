@@ -1,0 +1,2034 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>RoadStop — Hotel Billing</title>
+  <meta name="theme-color" content="#0d0d0d" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --bg: #0d0d0d;
+      --surface: #181818;
+      --card: #1f1f1f;
+      --border: #2a2a2a;
+      --accent: #f5a623;
+      --accent2: #e8441a;
+      --text: #f0ece4;
+      --muted: #888;
+      --green: #3ecf6e;
+      --blue: #3b8ff5;
+      --radius: 14px;
+      --cart-height: 72px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* HEADER */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 26px;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+
+    .logo span {
+      display: block;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 3px;
+      color: var(--muted);
+      -webkit-text-fill-color: var(--muted);
+      text-transform: uppercase;
+      margin-top: 1px;
+    }
+
+    .header-right {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .hbtn {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all .2s;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text);
+    }
+
+    .hbtn:active {
+      background: var(--border);
+    }
+
+    .hbtn.records {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* TABS */
+    .tabs-wrap {
+      padding: 12px 0 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tabs-wrap::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      padding: 0 16px 12px;
+      width: max-content;
+    }
+
+    .tab {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 7px 16px;
+      border-radius: 50px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .2s;
+      white-space: nowrap;
+    }
+
+    .tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #000;
+    }
+
+    /* MENU */
+    .menu-section {
+      padding: 16px 12px 100px;
+    }
+
+    .section-label {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 20px;
+      letter-spacing: 2px;
+      color: var(--accent);
+      margin-bottom: 12px;
+      padding-left: 4px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .item-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: transform .15s, border-color .15s;
+      position: relative;
+      user-select: none;
+    }
+
+    .item-card:active {
+      transform: scale(0.96);
+    }
+
+    .item-card.added {
+      border-color: var(--accent);
+    }
+
+    .item-img-placeholder {
+      width: 100%;
+      aspect-ratio: 1/1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 44px;
+      background: linear-gradient(135deg, #1a1a1a, #222);
+    }
+
+    .item-body {
+      padding: 10px 10px 12px;
+    }
+
+    .item-name {
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.3;
+      margin-bottom: 6px;
+    }
+
+    .item-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .item-price {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .add-btn {
+      width: 28px;
+      height: 28px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
+      color: #000;
+      line-height: 1;
+      flex-shrink: 0;
+      transition: background .15s;
+    }
+
+    .item-card.added .add-btn {
+      background: var(--green);
+      color: #000;
+    }
+
+    .qty-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: var(--accent2);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: scale(0);
+      transition: all .2s;
+    }
+
+    .qty-badge.show {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* CART BAR */
+    .cart-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 200;
+      background: linear-gradient(135deg, var(--accent2), #c03210);
+      padding: 0 16px;
+      height: var(--cart-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transform: translateY(100%);
+      transition: transform .3s cubic-bezier(.4, 0, .2, 1);
+      border-radius: 16px 16px 0 0;
+    }
+
+    .cart-bar.visible {
+      transform: translateY(0);
+    }
+
+    .cart-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .cart-count {
+      background: rgba(0, 0, 0, .3);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 50px;
+    }
+
+    .cart-bar-label {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .cart-bar-total {
+      font-size: 17px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* OVERLAY */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .75);
+      z-index: 300;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s;
+    }
+
+    .overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* CART SHEET */
+    .cart-sheet {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 400;
+      background: var(--surface);
+      border-radius: 20px 20px 0 0;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      transform: translateY(100%);
+      transition: transform .35s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    .cart-sheet.open {
+      transform: translateY(0);
+    }
+
+    .cart-handle {
+      width: 36px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 12px auto 0;
+      flex-shrink: 0;
+    }
+
+    .cart-header {
+      padding: 16px 20px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .cart-title {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 24px;
+      letter-spacing: 2px;
+    }
+
+    .close-btn {
+      width: 32px;
+      height: 32px;
+      background: var(--border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: var(--muted);
+      cursor: pointer;
+      border: none;
+    }
+
+    .cart-items {
+      overflow-y: auto;
+      flex: 1;
+      padding: 8px 0;
+    }
+
+    .cart-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 20px;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+      animation: slideIn .2s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-10px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0)
+      }
+    }
+
+    .cart-item-emoji {
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+
+    .cart-item-info {
+      flex: 1;
+    }
+
+    .cart-item-name {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+
+    .cart-item-unit {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .cart-item-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .qty-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background .15s;
+    }
+
+    .qty-btn:active {
+      background: var(--border);
+    }
+
+    .qty-btn.minus {
+      color: var(--accent2);
+    }
+
+    .qty-val {
+      font-size: 16px;
+      font-weight: 700;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .cart-item-total {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--accent);
+      min-width: 54px;
+      text-align: right;
+    }
+
+    .cart-footer {
+      border-top: 1px solid var(--border);
+      padding: 16px 20px;
+      flex-shrink: 0;
+    }
+
+    .grand-total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .grand-label {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 20px;
+      letter-spacing: 1px;
+      color: var(--muted);
+    }
+
+    .grand-amount {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 32px;
+      letter-spacing: 1px;
+      color: var(--green);
+    }
+
+    .pay-btn {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, var(--green), #2ab55a);
+      border: none;
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: #000;
+      cursor: pointer;
+      letter-spacing: .3px;
+      transition: opacity .2s, transform .15s;
+    }
+
+    .pay-btn:active {
+      transform: scale(0.98);
+      opacity: .9;
+    }
+
+    /* ── SHARED MODAL BASE ── */
+    .pay-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .85);
+      z-index: 500;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s;
+    }
+
+    .pay-modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .pay-modal {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 600;
+      background: var(--surface);
+      border-radius: 24px 24px 0 0;
+      transform: translateY(100%);
+      transition: transform .35s cubic-bezier(.4, 0, .2, 1);
+      padding-bottom: max(env(safe-area-inset-bottom), 16px);
+      max-height: 96vh;
+      overflow-y: auto;
+    }
+
+    .pay-modal.open {
+      transform: translateY(0);
+    }
+
+    .modal-handle {
+      width: 36px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 12px auto 16px;
+      flex-shrink: 0;
+    }
+
+    .modal-title {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 24px;
+      letter-spacing: 2px;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .modal-sub {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+
+    .modal-bill-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin: 0 20px 20px;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-bill-box .mbl {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .modal-bill-box .mbv {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 34px;
+      letter-spacing: 1px;
+      color: var(--green);
+    }
+
+    /* Step 1 – choose method */
+    .pay-methods {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 0 20px 16px;
+    }
+
+    .pay-method-btn {
+      border: 2px solid var(--border);
+      background: var(--card);
+      border-radius: 18px;
+      padding: 22px 12px;
+      cursor: pointer;
+      transition: all .2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .pay-method-btn:active {
+      transform: scale(0.95);
+    }
+
+    .pay-method-btn.gpay {
+      border-color: var(--blue);
+    }
+
+    .pay-method-btn.cash {
+      border-color: var(--green);
+    }
+
+    .pay-method-btn .pm-icon {
+      font-size: 38px;
+    }
+
+    .pay-method-btn .pm-name {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .pay-method-btn .pm-desc {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .pay-method-btn.gpay .pm-name {
+      color: var(--blue);
+    }
+
+    .pay-method-btn.cash .pm-name {
+      color: var(--green);
+    }
+
+    .modal-cancel-row {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .cancel-lnk {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 12px 24px;
+    }
+
+    /* Step 2 screens (hidden by default) */
+    .pay-step {
+      display: none;
+      padding: 0 20px 20px;
+    }
+
+    .pay-step.active {
+      display: block;
+    }
+
+    .step-back {
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0 20px 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ── CASH FLOW ── */
+    .cash-bill-row {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .cash-bill-row .cbl {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .cash-bill-row .cbv {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 30px;
+      color: var(--green);
+    }
+
+    .cash-input-label {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .cash-input-wrap {
+      position: relative;
+      margin-bottom: 14px;
+    }
+
+    .rupee-prefix {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: 'Bebas Neue', cursive;
+      font-size: 24px;
+      color: var(--accent);
+      pointer-events: none;
+    }
+
+    .cash-input {
+      width: 100%;
+      padding: 16px 16px 16px 40px;
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      font-family: 'Bebas Neue', cursive;
+      font-size: 32px;
+      color: var(--text);
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    .cash-input:focus {
+      border-color: var(--accent);
+    }
+
+    .quick-amounts {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .qa-btn {
+      padding: 8px 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .qa-btn:active {
+      background: var(--border);
+    }
+
+    .change-box {
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 20px;
+      text-align: center;
+      border: 2px solid;
+      transition: all .3s;
+    }
+
+    .change-box.positive {
+      background: rgba(62, 207, 110, .08);
+      border-color: var(--green);
+    }
+
+    .change-box.zero {
+      background: rgba(245, 166, 35, .08);
+      border-color: var(--accent);
+    }
+
+    .change-box.negative {
+      background: rgba(232, 68, 26, .08);
+      border-color: var(--accent2);
+    }
+
+    .change-box .cb-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .change-box.positive .cb-label {
+      color: var(--green);
+    }
+
+    .change-box.zero .cb-label {
+      color: var(--accent);
+    }
+
+    .change-box.negative .cb-label {
+      color: var(--accent2);
+    }
+
+    .change-box .cb-amount {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 44px;
+      letter-spacing: 2px;
+    }
+
+    .change-box.positive .cb-amount {
+      color: var(--green);
+    }
+
+    .change-box.zero .cb-amount {
+      color: var(--accent);
+    }
+
+    .change-box.negative .cb-amount {
+      color: var(--accent2);
+    }
+
+    .change-box .cb-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .confirm-cash-btn {
+      width: 100%;
+      padding: 18px;
+      border: none;
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .confirm-cash-btn.ready {
+      background: linear-gradient(135deg, var(--green), #2ab55a);
+      color: #000;
+    }
+
+    .confirm-cash-btn.not-ready {
+      background: var(--border);
+      color: var(--muted);
+      cursor: not-allowed;
+    }
+
+    /* ── UPI / QR FLOW ── */
+    .qr-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .qr-canvas-wrap {
+      display: inline-block;
+      background: #fff;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 0 0 4px rgba(59, 143, 245, .3);
+    }
+
+    #qrCanvas {
+      display: block;
+    }
+
+    .qr-amount-label {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .qr-amount-val {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 36px;
+      color: var(--blue);
+      letter-spacing: 2px;
+    }
+
+    .qr-upi-id {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+      word-break: break-all;
+    }
+
+    .upi-status-box {
+      border-radius: 14px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      border: 2px solid var(--border);
+      background: var(--card);
+    }
+
+    .upi-status-label {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .upi-status-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .upi-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--muted);
+      animation: pulse 1.5s infinite;
+    }
+
+    .upi-dot.waiting {
+      background: var(--accent);
+    }
+
+    .upi-dot.received {
+      background: var(--green);
+      animation: none;
+    }
+
+    .upi-dot.mismatch {
+      background: var(--accent2);
+      animation: none;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .3
+      }
+    }
+
+    .upi-status-text {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .upi-manual-section {
+      margin-bottom: 16px;
+    }
+
+    .upi-manual-label {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .upi-input-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .upi-rupee {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 22px;
+      color: var(--blue);
+    }
+
+    .upi-amount-input {
+      flex: 1;
+      padding: 14px 16px;
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-family: 'Bebas Neue', cursive;
+      font-size: 28px;
+      color: var(--text);
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    .upi-amount-input:focus {
+      border-color: var(--blue);
+    }
+
+    .upi-amount-input.correct {
+      border-color: var(--green);
+    }
+
+    .upi-amount-input.wrong {
+      border-color: var(--accent2);
+    }
+
+    .confirm-upi-btn {
+      width: 100%;
+      padding: 18px;
+      border: none;
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .confirm-upi-btn.ready {
+      background: linear-gradient(135deg, var(--blue), #2070d0);
+      color: #fff;
+    }
+
+    .confirm-upi-btn.not-ready {
+      background: var(--border);
+      color: var(--muted);
+      cursor: not-allowed;
+    }
+
+    .upi-note {
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 10px;
+      line-height: 1.6;
+    }
+
+    /* RECORDS PANEL */
+    .records-panel {
+      position: fixed;
+      inset: 0;
+      z-index: 700;
+      background: var(--bg);
+      transform: translateX(100%);
+      transition: transform .35s cubic-bezier(.4, 0, .2, 1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .records-panel.open {
+      transform: translateX(0);
+    }
+
+    .rec-header {
+      flex-shrink: 0;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .back-btn {
+      width: 38px;
+      height: 38px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--text);
+      flex-shrink: 0;
+    }
+
+    .rec-title {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 22px;
+      letter-spacing: 2px;
+      flex: 1;
+    }
+
+    .export-btn {
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      padding: 9px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #000;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .rec-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      background: var(--bg);
+    }
+
+    .rec-tab {
+      flex: 1;
+      padding: 13px 8px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all .2s;
+    }
+
+    .rec-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .rec-body {
+      padding: 16px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .summary-row {
+      display: grid;
+      grid-template-columns: 3fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .summary-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 16px;
+    }
+
+    .summary-card .s-lbl {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .summary-card .s-val {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 26px;
+      letter-spacing: 1px;
+    }
+
+    .sc-green .s-val {
+      color: var(--green);
+    }
+
+    .sc-amber .s-val {
+      color: var(--accent);
+    }
+
+    .sc-blue .s-val {
+      color: var(--blue);
+    }
+
+    .sc-red .s-val {
+      color: var(--accent2);
+    }
+
+    .rec-section-title {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 18px;
+      letter-spacing: 2px;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .bill-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .bill-card-header {
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .bill-card-header:active {
+      background: rgba(255, 255, 255, .03);
+    }
+
+    .bill-no {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .bill-meta {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .bill-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+
+    .bill-total {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--green);
+    }
+
+    .bill-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 50px;
+    }
+
+    .bb-gpay {
+      background: rgba(59, 143, 245, .15);
+      color: var(--blue);
+    }
+
+    .bb-cash {
+      background: rgba(62, 207, 110, .15);
+      color: var(--green);
+    }
+
+    .bill-items-list {
+      border-top: 1px solid var(--border);
+      padding: 10px 14px;
+      display: none;
+    }
+
+    .bill-items-list.show {
+      display: block;
+    }
+
+    .bill-item-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      padding: 4px 0;
+      color: var(--muted);
+    }
+
+    .bill-item-row span:last-child {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .bill-total-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      padding: 8px 0 2px;
+      border-top: 1px solid var(--border);
+      margin-top: 4px;
+    }
+
+    .no-records {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+
+    .no-records .icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: var(--green);
+      color: #000;
+      font-family: 'Bebas Neue', cursive;
+      font-size: 26px;
+      letter-spacing: 2px;
+      padding: 24px 40px;
+      border-radius: 16px;
+      z-index: 999;
+      text-align: center;
+      transition: transform .3s cubic-bezier(.175, .885, .32, 1.275);
+      pointer-events: none;
+      min-width: 200px;
+    }
+
+    .toast.show {
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .toast .t-sub {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      margin-top: 4px;
+      opacity: .7;
+    }
+
+    .empty-cart {
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .empty-cart .icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .empty-cart p {
+      color: var(--muted);
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">RoadStop<span>Hotel & Dining</span></div>
+    <div class="header-right">
+      <button class="hbtn records" onclick="openRecords()">📋 Records</button>
+      <button class="hbtn" onclick="clearCart()">Clear</button>
+    </div>
+  </header>
+
+  <!-- CATEGORY TABS -->
+  <div class="tabs-wrap">
+    <div class="tabs" id="tabs"></div>
+  </div>
+
+  <!-- MENU GRID -->
+  <div class="menu-section" id="menuSection"></div>
+
+  <!-- CART BAR -->
+  <div class="cart-bar" id="cartBar" onclick="openCart()">
+    <div class="cart-bar-left">
+      <div class="cart-count" id="cartCount">0</div>
+      <div class="cart-bar-label">View Order</div>
+    </div>
+    <div class="cart-bar-total" id="cartBarTotal">₹0</div>
+  </div>
+
+  <!-- CART OVERLAY + SHEET -->
+  <div class="overlay" id="cartOverlay" onclick="closeCart()"></div>
+  <div class="cart-sheet" id="cartSheet">
+    <div class="cart-handle"></div>
+    <div class="cart-header">
+      <div class="cart-title">Your Order</div>
+      <button class="close-btn" onclick="closeCart()">✕</button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer">
+      <div class="grand-total-row">
+        <div class="grand-label">Grand Total</div>
+        <div class="grand-amount" id="grandTotal">₹0</div>
+      </div>
+      <button class="pay-btn" onclick="openPayModal()">💳 Proceed to Pay</button>
+    </div>
+  </div>
+
+  <!-- PAYMENT MODAL (multi-step) -->
+  <div class="pay-modal-overlay" id="payOverlay" onclick="closePayModal()"></div>
+  <div class="pay-modal" id="payModal">
+    <div class="modal-handle"></div>
+
+    <!-- STEP 0: Choose Method -->
+    <div id="stepChoose">
+      <div class="modal-title">Confirm Payment</div>
+      <div class="modal-sub">How is the customer paying?</div>
+      <div class="modal-bill-box">
+        <div class="mbl">Bill Amount</div>
+        <div class="mbv" id="modalAmt">₹0</div>
+      </div>
+      <div class="pay-methods">
+        <div class="pay-method-btn cash" onclick="showCashStep()">
+          <div class="pm-icon">💵</div>
+          <div class="pm-name">Cash</div>
+          <div class="pm-desc">Count &amp; change</div>
+        </div>
+        <div class="pay-method-btn gpay" onclick="showUpiStep()">
+          <div class="pm-icon">📱</div>
+          <div class="pm-name">GPay / UPI</div>
+          <div class="pm-desc">QR scan</div>
+        </div>
+      </div>
+      <div class="modal-cancel-row">
+        <button class="cancel-lnk" onclick="closePayModal()">✕ Cancel</button>
+      </div>
+    </div>
+
+    <!-- STEP 1: Cash -->
+    <div id="stepCash" style="display:none">
+      <button class="step-back" onclick="backToChoose()">← Back</button>
+      <div class="modal-title" style="margin-bottom:16px">💵 Cash Payment</div>
+      <div style="padding:0 20px">
+        <div class="cash-bill-row">
+          <div class="cbl">Bill Amount</div>
+          <div class="cbv" id="cashBillAmt">₹0</div>
+        </div>
+        <div class="cash-input-label">Customer Gave (₹)</div>
+        <div class="cash-input-wrap">
+          <div class="rupee-prefix">₹</div>
+          <input class="cash-input" id="cashGiven" type="number" inputmode="numeric" placeholder="0"
+            oninput="calcChange()" />
+        </div>
+        <div class="quick-amounts" id="quickAmts"></div>
+        <div class="change-box zero" id="changeBox">
+          <div class="cb-label">Balance / Change</div>
+          <div class="cb-amount" id="changeAmt">₹0</div>
+          <div class="cb-sub" id="changeSub">Enter amount above</div>
+        </div>
+        <button class="confirm-cash-btn not-ready" id="confirmCashBtn" onclick="confirmPayment('cash')">
+          ✓ Confirm Cash Payment
+        </button>
+      </div>
+      <div style="height:16px"></div>
+    </div>
+
+    <!-- STEP 2: UPI / QR -->
+    <div id="stepUpi" style="display:none">
+      <button class="step-back" onclick="backToChoose()">← Back</button>
+      <div class="modal-title" style="margin-bottom:4px">📱 UPI Payment</div>
+      <div class="modal-sub">Customer scans QR below</div>
+      <div style="padding:0 20px">
+        <div class="qr-container">
+          <div class="qr-canvas-wrap">
+            <canvas id="qrCanvas" width="180" height="180"></canvas>
+          </div>
+          <div class="qr-amount-label">Scan to Pay</div>
+          <div class="qr-amount-val" id="upiAmtDisplay">₹0</div>
+          <div class="qr-upi-id" id="upiIdDisplay"></div>
+        </div>
+        <div class="upi-manual-section">
+          <div class="upi-manual-label">Enter amount customer paid (₹)</div>
+          <div class="upi-input-row">
+            <div class="upi-rupee">₹</div>
+            <input class="upi-amount-input" id="upiPaidInput" type="number" inputmode="numeric" placeholder="0"
+              oninput="checkUpiAmount()" />
+          </div>
+        </div>
+        <div class="upi-status-box" id="upiStatusBox">
+          <div class="upi-status-label">Payment Status</div>
+          <div class="upi-status-row">
+            <div class="upi-dot waiting" id="upiDot"></div>
+            <div class="upi-status-text" id="upiStatusText">Waiting for customer to scan…</div>
+          </div>
+        </div>
+        <button class="confirm-upi-btn not-ready" id="confirmUpiBtn" onclick="confirmPayment('gpay')">
+          ✓ Confirm UPI Payment
+        </button>
+        <div class="upi-note">
+          After customer scans and pays, type the exact amount received above.<br>
+          Amount must match the bill to confirm.
+        </div>
+      </div>
+      <div style="height:16px"></div>
+    </div>
+  </div>
+
+  <!-- RECORDS PANEL -->
+  <div class="records-panel" id="recordsPanel">
+    <div class="rec-header">
+      <button class="back-btn" onclick="closeRecords()">←</button>
+      <div class="rec-title">Billing Records</div>
+      <button class="export-btn" onclick="exportExcel()">⬇ Excel</button>
+    </div>
+    <div class="rec-tabs">
+      <div class="rec-tab active" id="rtab-today" onclick="switchRecTab('today')">Today</div>
+      <div class="rec-tab" id="rtab-month" onclick="switchRecTab('month')">This Month</div>
+      <div class="rec-tab" id="rtab-all" onclick="switchRecTab('all')">All Bills</div>
+    </div>
+    <div class="rec-body" id="recBody"></div>
+  </div>
+
+  <!-- SUCCESS TOAST -->
+  <div class="toast" id="toast">
+    <div id="toastMsg">Payment Done!</div>
+    <div class="t-sub" id="toastSub">Thank you • Come again</div>
+  </div>
+
+  <script>
+    // ── MENU DATA ──────────────────────────────────────────
+    const menu = [
+      {
+        category: "Tiffin", items: [
+          { id: 1, name: "Poratta", price: 15, emoji: "🫓" },
+          { id: 2, name: "Dosa", price: 20, emoji: "🥞" },
+          { id: 3, name: "Chappathi", price: 20, emoji: "🫓" },
+          { id: 4, name: "Idli", price: 10, emoji: "🍚" },
+          { id: 5, name: "Vada", price: 12, emoji: "🍩" },
+          { id: 6, name: "Poori", price: 15, emoji: "🫔" },
+          { id: 7, name: "Upma", price: 20, emoji: "🥣" },
+          { id: 8, name: "Pongal", price: 25, emoji: "🍲" },
+        ]
+      },
+      {
+        category: "Egg Items", items: [
+          { id: 9, name: "Half Boil", price: 10, emoji: "🥚" },
+          { id: 10, name: "Full Boil", price: 10, emoji: "🥚" },
+          { id: 11, name: "Omelette", price: 15, emoji: "🍳" },
+          { id: 12, name: "Egg Bhurji", price: 20, emoji: "🍳" },
+          { id: 13, name: "Egg Fry", price: 15, emoji: "🍳" },
+        ]
+      },
+      {
+        category: "Meals", items: [
+          { id: 14, name: "Chicken Rice", price: 90, emoji: "🍛" },
+          { id: 15, name: "Veg Rice", price: 50, emoji: "🍱" },
+          { id: 16, name: "Mutton Rice", price: 120, emoji: "🫕" },
+          { id: 17, name: "Fish Rice", price: 100, emoji: "🐟" },
+          { id: 18, name: "Dal Rice", price: 50, emoji: "🍲" },
+          { id: 19, name: "Curd Rice", price: 40, emoji: "🥣" },
+        ]
+      },
+      {
+        category: "Curries", items: [
+          { id: 20, name: "Chicken Curry", price: 80, emoji: "🍖" },
+          { id: 21, name: "Mutton Curry", price: 120, emoji: "🍖" },
+          { id: 22, name: "Fish Curry", price: 80, emoji: "🐟" },
+          { id: 23, name: "Dal", price: 30, emoji: "🍲" },
+          { id: 24, name: "Sambar", price: 20, emoji: "🥘" },
+          { id: 25, name: "Veg Kurma", price: 40, emoji: "🥗" },
+        ]
+      },
+      {
+        category: "Drinks", items: [
+          { id: 26, name: "Tea", price: 10, emoji: "☕" },
+          { id: 27, name: "Coffee", price: 15, emoji: "🫖" },
+          { id: 28, name: "Lassi", price: 30, emoji: "🥛" },
+          { id: 29, name: "Buttermilk", price: 15, emoji: "🫙" },
+          { id: 30, name: "Cool Drink", price: 20, emoji: "🥤" },
+          { id: 31, name: "Water Bottle", price: 20, emoji: "💧" },
+        ]
+      },
+    ];
+
+    // ── STATE ──────────────────────────────────────────────
+    let cart = {};
+    let activeCategory = menu[0].category;
+    let activeRecTab = 'today';
+    let billCounter = +(localStorage.getItem('rs_ctr') || 0);
+    let bills = JSON.parse(localStorage.getItem('rs_bills') || '[]');
+
+    function saveBills() {
+      localStorage.setItem('rs_bills', JSON.stringify(bills));
+      localStorage.setItem('rs_ctr', billCounter);
+    }
+
+    // ── TABS ───────────────────────────────────────────────
+    function renderTabs() {
+      document.getElementById('tabs').innerHTML = menu.map(c =>
+        `<button class="tab ${c.category === activeCategory ? 'active' : ''}" onclick="switchCategory('${c.category}')">${c.category}</button>`
+      ).join('');
+    }
+    function switchCategory(cat) { activeCategory = cat; renderTabs(); renderMenu(); }
+
+    // ── MENU ───────────────────────────────────────────────
+    function renderMenu() {
+      const cat = menu.find(c => c.category === activeCategory);
+      document.getElementById('menuSection').innerHTML = `
+    <div class="section-label">${cat.category}</div>
+    <div class="grid">${cat.items.map(item => {
+        const qty = cart[item.id]?.qty || 0;
+        return `<div class="item-card ${qty ? 'added' : ''}" id="card-${item.id}" onclick="addToCart(${item.id})">
+        <div class="qty-badge ${qty ? 'show' : ''}" id="badge-${item.id}">${qty}</div>
+        <div class="item-img-placeholder">${item.emoji}</div>
+        <div class="item-body">
+          <div class="item-name">${item.name}</div>
+          <div class="item-footer">
+            <div class="item-price">₹${item.price}</div>
+            <div class="add-btn">${qty ? '✓' : '+'}</div>
+          </div>
+        </div>
+      </div>`;
+      }).join('')}</div>`;
+    }
+
+    // ── CART ───────────────────────────────────────────────
+    function findItem(id) { for (const c of menu) { const i = c.items.find(x => x.id === id); if (i) return i; } }
+
+    function addToCart(id) {
+      const item = findItem(id);
+      cart[id] ? cart[id].qty++ : (cart[id] = { item, qty: 1 });
+      updateCardUI(id); updateCartBar();
+      if (navigator.vibrate) navigator.vibrate(25);
+    }
+
+    function changeQty(id, d) {
+      if (!cart[id]) return;
+      cart[id].qty += d;
+      if (cart[id].qty <= 0) delete cart[id];
+      updateCardUI(id); updateCartBar(); renderCartSheet();
+    }
+
+    function updateCardUI(id) {
+      const qty = cart[id]?.qty || 0;
+      const card = document.getElementById(`card-${id}`);
+      const badge = document.getElementById(`badge-${id}`);
+      if (!card) return;
+      card.classList.toggle('added', qty > 0);
+      if (badge) { badge.classList.toggle('show', qty > 0); badge.textContent = qty; }
+      const ab = card.querySelector('.add-btn');
+      if (ab) ab.textContent = qty ? '✓' : '+';
+    }
+
+    function clearCart() { cart = {}; renderMenu(); updateCartBar(); renderCartSheet(); }
+    function getTotal() { return Object.values(cart).reduce((s, e) => s + e.item.price * e.qty, 0); }
+    function getCount() { return Object.values(cart).reduce((s, e) => s + e.qty, 0); }
+
+    function updateCartBar() {
+      const count = getCount(), total = getTotal();
+      document.getElementById('cartCount').textContent = count;
+      document.getElementById('cartBarTotal').textContent = `₹${total}`;
+      document.getElementById('cartBar').classList.toggle('visible', count > 0);
+      if (!count) closeCart();
+    }
+
+    function openCart() {
+      document.getElementById('cartSheet').classList.add('open');
+      document.getElementById('cartOverlay').classList.add('open');
+      renderCartSheet();
+    }
+    function closeCart() {
+      document.getElementById('cartSheet').classList.remove('open');
+      document.getElementById('cartOverlay').classList.remove('open');
+    }
+
+    function renderCartSheet() {
+      const items = Object.values(cart);
+      const c = document.getElementById('cartItems');
+      document.getElementById('grandTotal').textContent = `₹${getTotal()}`;
+      if (!items.length) {
+        c.innerHTML = `<div class="empty-cart"><div class="icon">🛒</div><p>Your order is empty.<br>Tap items to add.</p></div>`;
+        return;
+      }
+      c.innerHTML = items.map(({ item, qty }) => `
+    <div class="cart-item">
+      <div class="cart-item-emoji">${item.emoji}</div>
+      <div class="cart-item-info">
+        <div class="cart-item-name">${item.name}</div>
+        <div class="cart-item-unit">₹${item.price} × ${qty}</div>
+      </div>
+      <div class="cart-item-controls">
+        <button class="qty-btn minus" onclick="changeQty(${item.id},-1)">−</button>
+        <div class="qty-val">${qty}</div>
+        <button class="qty-btn" onclick="changeQty(${item.id},1)">+</button>
+      </div>
+      <div class="cart-item-total">₹${item.price * qty}</div>
+    </div>`).join('');
+    }
+
+    // ── PAYMENT MODAL ──────────────────────────────────────
+    // UPI ID – change this to your actual UPI ID
+    const UPI_ID = 'roadstop@upi';
+    const UPI_NAME = 'RoadStop Hotel';
+
+    function openPayModal() {
+      if (!getCount()) return;
+      closeCart();
+      const total = getTotal();
+      document.getElementById('modalAmt').textContent = `₹${total}`;
+      document.getElementById('payModal').classList.add('open');
+      document.getElementById('payOverlay').classList.add('open');
+      showStep('choose');
+    }
+
+    function closePayModal() {
+      document.getElementById('payModal').classList.remove('open');
+      document.getElementById('payOverlay').classList.remove('open');
+      // reset
+      document.getElementById('cashGiven').value = '';
+      document.getElementById('upiPaidInput').value = '';
+      resetUpiStatus();
+    }
+
+    function showStep(name) {
+      document.getElementById('stepChoose').style.display = name === 'choose' ? 'block' : 'none';
+      document.getElementById('stepCash').style.display = name === 'cash' ? 'block' : 'none';
+      document.getElementById('stepUpi').style.display = name === 'upi' ? 'block' : 'none';
+    }
+
+    function backToChoose() { showStep('choose'); }
+
+    // ── CASH STEP ──
+    function showCashStep() {
+      const total = getTotal();
+      document.getElementById('cashBillAmt').textContent = `₹${total}`;
+      document.getElementById('cashGiven').value = '';
+      // Build quick amounts: next multiples of 10/50/100 above total
+      const qa = [];
+      [1, 5, 10, 20, 50, 100, 200, 500].forEach(d => { const v = Math.ceil(total / d) * d; if (v >= total && !qa.includes(v) && qa.length < 6) qa.push(v); });
+      // also add exact
+      if (!qa.includes(total)) qa.unshift(total);
+      document.getElementById('quickAmts').innerHTML = qa.slice(0, 6).map(v => `<button class="qa-btn" onclick="setQuick(${v})">₹${v}</button>`).join('');
+      calcChange();
+      showStep('cash');
+      setTimeout(() => document.getElementById('cashGiven').focus(), 300);
+    }
+
+    function setQuick(v) { document.getElementById('cashGiven').value = v; calcChange(); }
+
+    function calcChange() {
+      const total = getTotal();
+      const given = parseFloat(document.getElementById('cashGiven').value) || 0;
+      const change = given - total;
+      const box = document.getElementById('changeBox');
+      const amtEl = document.getElementById('changeAmt');
+      const subEl = document.getElementById('changeSub');
+      const btn = document.getElementById('confirmCashBtn');
+
+      box.className = 'change-box';
+      if (given === 0) {
+        box.classList.add('zero');
+        amtEl.textContent = '₹0';
+        subEl.textContent = 'Enter amount above';
+        btn.className = 'confirm-cash-btn not-ready';
+        btn.disabled = true;
+      } else if (change < 0) {
+        box.classList.add('negative');
+        amtEl.textContent = `₹${Math.abs(change)}`;
+        subEl.textContent = `Short by ₹${Math.abs(change)} — need more cash`;
+        btn.className = 'confirm-cash-btn not-ready';
+        btn.disabled = true;
+      } else if (change === 0) {
+        box.classList.add('zero');
+        amtEl.textContent = 'Exact!';
+        subEl.textContent = 'Perfect — no change needed';
+        btn.className = 'confirm-cash-btn ready';
+        btn.disabled = false;
+      } else {
+        box.classList.add('positive');
+        amtEl.textContent = `₹${change}`;
+        subEl.textContent = `Return ₹${change} to customer`;
+        btn.className = 'confirm-cash-btn ready';
+        btn.disabled = false;
+      }
+    }
+
+    // ── UPI / QR STEP ──
+    function showUpiStep() {
+      const total = getTotal();
+      document.getElementById('upiAmtDisplay').textContent = `₹${total}`;
+      document.getElementById('upiIdDisplay').textContent = UPI_ID;
+      document.getElementById('upiPaidInput').value = '';
+      resetUpiStatus();
+      showStep('upi');
+      drawQR(total);
+    }
+
+    function resetUpiStatus() {
+      const dot = document.getElementById('upiDot');
+      const txt = document.getElementById('upiStatusText');
+      const btn = document.getElementById('confirmUpiBtn');
+      const inp = document.getElementById('upiPaidInput');
+      if (dot) dot.className = 'upi-dot waiting';
+      if (txt) txt.textContent = 'Waiting for customer to scan…';
+      if (btn) { btn.className = 'confirm-upi-btn not-ready'; btn.disabled = true; }
+      if (inp) { inp.className = 'upi-amount-input'; }
+    }
+
+    function checkUpiAmount() {
+      const total = getTotal();
+      const paid = parseFloat(document.getElementById('upiPaidInput').value) || 0;
+      const dot = document.getElementById('upiDot');
+      const txt = document.getElementById('upiStatusText');
+      const btn = document.getElementById('confirmUpiBtn');
+      const inp = document.getElementById('upiPaidInput');
+
+      if (paid === 0) {
+        resetUpiStatus(); return;
+      }
+      if (paid === total) {
+        dot.className = 'upi-dot received';
+        txt.textContent = `✓ ₹${total} received — payment confirmed!`;
+        txt.style.color = 'var(--green)';
+        inp.className = 'upi-amount-input correct';
+        btn.className = 'confirm-upi-btn ready';
+        btn.disabled = false;
+        if (navigator.vibrate) navigator.vibrate([30, 20, 30]);
+      } else {
+        dot.className = 'upi-dot mismatch';
+        txt.textContent = paid < total
+          ? `Amount short — need ₹${total - paid} more`
+          : `Overpaid by ₹${paid - total} — verify`;
+        txt.style.color = paid < total ? 'var(--accent2)' : 'var(--accent)';
+        inp.className = 'upi-amount-input wrong';
+        btn.className = 'confirm-upi-btn not-ready';
+        btn.disabled = true;
+      }
+    }
+
+    // ── QR CODE GENERATOR (pure canvas, no library needed) ──
+    function drawQR(amount) {
+      // Build UPI deep-link string
+      const upiUrl = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${amount}&cu=INR&tn=${encodeURIComponent('RoadStop Bill')}`;
+      const canvas = document.getElementById('qrCanvas');
+      const ctx = canvas.getContext('2d');
+      const size = 180;
+      canvas.width = size; canvas.height = size;
+
+      // Use QR generation via a free public API rendered as image
+      const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiUrl)}&bgcolor=ffffff&color=000000&margin=4`;
+      const img = new Image(); img.crossOrigin = 'anonymous';
+      img.onload = () => { ctx.drawImage(img, 0, 0, size, size); };
+      img.onerror = () => {
+        // Fallback: draw a placeholder with text
+        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, size, size);
+        ctx.fillStyle = '#000'; ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('UPI QR', size / 2, size / 2 - 10);
+        ctx.font = '11px sans-serif';
+        ctx.fillText(UPI_ID, size / 2, size / 2 + 10);
+        ctx.fillText(`₹${amount}`, size / 2, size / 2 + 28);
+      };
+      img.src = apiUrl;
+    }
+
+    function confirmPayment(method) {
+      const now = new Date();
+      billCounter++;
+      const total = getTotal();
+      const given = method === 'cash' ? parseFloat(document.getElementById('cashGiven').value) || total : total;
+      const change = method === 'cash' ? given - total : 0;
+      const bill = {
+        id: billCounter,
+        billNo: `RS${String(billCounter).padStart(4, '0')}`,
+        date: now.toISOString(),
+        method,
+        items: Object.values(cart).map(({ item, qty }) => ({ name: item.name, price: item.price, qty, total: item.price * qty })),
+        total,
+        cashGiven: method === 'cash' ? given : null,
+        changeReturned: method === 'cash' ? change : null,
+      };
+      bills.unshift(bill);
+      saveBills();
+      closePayModal();
+      const lbl = method === 'gpay' ? 'GPay / UPI' : 'Cash';
+      document.getElementById('toastMsg').textContent = 'Payment Done!';
+      document.getElementById('toastSub').textContent = `${lbl} • ${bill.billNo}${method === 'cash' && change > 0 ? ' • Change ₹' + change : ''}`;
+      const t = document.getElementById('toast');
+      t.classList.add('show');
+      setTimeout(() => { t.classList.remove('show'); clearCart(); }, 2600);
+      if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
+    }
+
+    // ── RECORDS ────────────────────────────────────────────
+    function openRecords() { document.getElementById('recordsPanel').classList.add('open'); renderRecords(); }
+    function closeRecords() { document.getElementById('recordsPanel').classList.remove('open'); }
+
+    function switchRecTab(tab) {
+      activeRecTab = tab;
+      document.querySelectorAll('.rec-tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(`rtab-${tab}`).classList.add('active');
+      renderRecords();
+    }
+
+    function filterBills(tab) {
+      const now = new Date(), ts = now.toDateString(), ym = `${now.getFullYear()}-${now.getMonth()}`;
+      if (tab === 'today') return bills.filter(b => new Date(b.date).toDateString() === ts);
+      if (tab === 'month') return bills.filter(b => { const d = new Date(b.date); return `${d.getFullYear()}-${d.getMonth()}` === ym; });
+      return bills;
+    }
+
+    function fmtDate(iso) {
+      const d = new Date(iso);
+      return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' +
+        d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function renderRecords() {
+      const f = filterBills(activeRecTab);
+      const tot = f.reduce((s, b) => s + b.total, 0);
+      const gpay = f.filter(b => b.method === 'gpay').reduce((s, b) => s + b.total, 0);
+      const cash = f.filter(b => b.method === 'cash').reduce((s, b) => s + b.total, 0);
+      const labels = { 'today': 'Today', 'month': 'This Month', 'all': 'All Time' };
+
+      document.getElementById('recBody').innerHTML = `
+    <div class="rec-section-title">${labels[activeRecTab]} Summary</div>
+    <div class="summary-row">
+      <div class="summary-card sc-green"><div class="s-lbl">Total Revenue</div><div class="s-val">₹${tot.toLocaleString('en-IN')}</div></div>
+      <div class="summary-card sc-amber"><div class="s-lbl">Bills Raised</div><div class="s-val">${f.length}</div></div>
+      <div class="summary-card sc-blue"><div class="s-lbl">GPay / UPI</div><div class="s-val">₹${gpay.toLocaleString('en-IN')}</div></div>
+      <div class="summary-card sc-red"><div class="s-lbl">Cash</div><div class="s-val">₹${cash.toLocaleString('en-IN')}</div></div>
+    </div>
+    <div class="rec-section-title">Bills</div>
+    ${!f.length
+          ? `<div class="no-records"><div class="icon">📭</div><p>No bills for this period.</p></div>`
+          : f.map(b => `
+        <div class="bill-card">
+          <div class="bill-card-header" onclick="toggleBill('${b.billNo}')">
+            <div>
+              <div class="bill-no">${b.billNo}</div>
+              <div class="bill-meta">${fmtDate(b.date)} &bull; ${b.items.length} item${b.items.length > 1 ? 's' : ''}</div>
+            </div>
+            <div class="bill-right">
+              <div class="bill-total">₹${b.total}</div>
+              <div class="bill-badge ${b.method === 'gpay' ? 'bb-gpay' : 'bb-cash'}">${b.method === 'gpay' ? '📱 GPay' : '💵 Cash'}</div>
+            </div>
+          </div>
+            <div class="bill-items-list" id="bill-${b.billNo}">
+            ${b.items.map(i => `<div class="bill-item-row"><span>${i.name} × ${i.qty}</span><span>₹${i.total}</span></div>`).join('')}
+            <div class="bill-total-row"><span style="font-weight:700;color:var(--text)">Total</span><span style="color:var(--green);font-weight:700;">₹${b.total}</span></div>
+            ${b.method === 'cash' && b.cashGiven ? `
+            <div class="bill-item-row" style="margin-top:8px"><span style="color:var(--muted)">Cash Received</span><span>₹${b.cashGiven}</span></div>
+            <div class="bill-item-row"><span style="color:var(--muted)">Change Returned</span><span style="color:${b.changeReturned > 0 ? 'var(--accent)' : 'var(--green)'}">₹${b.changeReturned || 0}</span></div>` : ''}
+          </div>
+        </div>`).join('')
+        }`;
+    }
+
+    function toggleBill(no) {
+      document.getElementById(`bill-${no}`).classList.toggle('show');
+    }
+
+    // ── EXCEL EXPORT ───────────────────────────────────────
+    function exportExcel() {
+      if (!bills.length) { alert('No records to export yet.'); return; }
+      const wb = XLSX.utils.book_new();
+
+      function billsToRows(arr) {
+        const rows = [['Bill No', 'Date', 'Time', 'Items', 'Total (₹)', 'Payment Method', 'Cash Given (₹)', 'Change Returned (₹)']];
+        arr.forEach(b => {
+          const d = new Date(b.date);
+          rows.push([
+            b.billNo,
+            d.toLocaleDateString('en-IN'),
+            d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+            b.items.map(i => `${i.name} x${i.qty}`).join(', '),
+            b.total,
+            b.method === 'gpay' ? 'GPay/UPI' : 'Cash',
+            b.method === 'cash' ? (b.cashGiven || b.total) : '',
+            b.method === 'cash' ? (b.changeReturned || 0) : '',
+          ]);
+        });
+        if (arr.length) rows.push(['', '', '', 'TOTAL', { f: `SUM(E2:E${arr.length + 1})` }, '', '', '']);
+        return rows;
+      }
+
+      function addSheet(data, name) {
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        ws['!cols'] = [{ wch: 10 }, { wch: 14 }, { wch: 8 }, { wch: 50 }, { wch: 12 }, { wch: 14 }, { wch: 14 }, { wch: 16 }];
+        XLSX.utils.book_append_sheet(wb, ws, name);
+      }
+
+      addSheet(billsToRows(bills), 'All Bills');
+      addSheet(billsToRows(filterBills('today')), "Today's Bills");
+      addSheet(billsToRows(filterBills('month')), 'This Month');
+
+      // Monthly Summary sheet
+      const mmap = {};
+      bills.forEach(b => {
+        const d = new Date(b.date);
+        const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        if (!mmap[k]) mmap[k] = { month: d.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }), bills: 0, total: 0, gpay: 0, cash: 0 };
+        mmap[k].bills++; mmap[k].total += b.total;
+        b.method === 'gpay' ? mmap[k].gpay += b.total : mmap[k].cash += b.total;
+      });
+      const mrows = [['Month', 'No. of Bills', 'Total Revenue (₹)', 'GPay/UPI (₹)', 'Cash (₹)']];
+      Object.values(mmap).forEach(m => mrows.push([m.month, m.bills, m.total, m.gpay, m.cash]));
+      const wm = XLSX.utils.aoa_to_sheet(mrows);
+      wm['!cols'] = [{ wch: 20 }, { wch: 12 }, { wch: 18 }, { wch: 14 }, { wch: 12 }];
+      XLSX.utils.book_append_sheet(wb, wm, 'Monthly Summary');
+
+      // Item-wise Sales sheet
+      const imap = {};
+      bills.forEach(b => b.items.forEach(i => {
+        if (!imap[i.name]) imap[i.name] = { name: i.name, qty: 0, revenue: 0 };
+        imap[i.name].qty += i.qty; imap[i.name].revenue += i.total;
+      }));
+      const irows = [['Item Name', 'Qty Sold', 'Revenue (₹)']];
+      Object.values(imap).sort((a, b) => b.revenue - a.revenue).forEach(i => irows.push([i.name, i.qty, i.revenue]));
+      const wi = XLSX.utils.aoa_to_sheet(irows);
+      wi['!cols'] = [{ wch: 22 }, { wch: 12 }, { wch: 14 }];
+      XLSX.utils.book_append_sheet(wb, wi, 'Item-wise Sales');
+
+      const now = new Date();
+      XLSX.writeFile(wb, `RoadStop_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}.xlsx`);
+    }
+
+    // ── INIT ───────────────────────────────────────────────
+    renderTabs();
+    renderMenu();
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => { }));
+  </script>
+</body>
+
+</html>

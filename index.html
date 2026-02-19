@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>RoadStop — Hotel Billing</title>
+  <meta name="theme-color" content="#0d0d0d"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <!-- ── HEADER ── -->
+  <header>
+    <div class="logo">RoadStop<span>Hotel & Dining</span></div>
+    <div class="header-right">
+      <button class="hbtn records" onclick="openRecords()">📋 Records</button>
+      <button class="hbtn" onclick="clearCart()">Clear</button>
+    </div>
+  </header>
+
+  <!-- ── CATEGORY TABS ── -->
+  <div class="tabs-wrap">
+    <div class="tabs" id="tabs"></div>
+  </div>
+
+  <!-- ── MENU GRID ── -->
+  <div class="menu-section" id="menuSection"></div>
+
+  <!-- ── CART BAR ── -->
+  <div class="cart-bar" id="cartBar" onclick="openCart()">
+    <div class="cart-bar-left">
+      <div class="cart-count" id="cartCount">0</div>
+      <div class="cart-bar-label">View Order</div>
+    </div>
+    <div class="cart-bar-total" id="cartBarTotal">₹0</div>
+  </div>
+
+  <!-- ── CART OVERLAY + SHEET ── -->
+  <div class="overlay" id="cartOverlay" onclick="closeCart()"></div>
+  <div class="cart-sheet" id="cartSheet">
+    <div class="cart-handle"></div>
+    <div class="cart-header">
+      <div class="cart-title">Your Order</div>
+      <button class="close-btn" onclick="closeCart()">✕</button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer">
+      <div class="grand-total-row">
+        <div class="grand-label">Grand Total</div>
+        <div class="grand-amount" id="grandTotal">₹0</div>
+      </div>
+      <button class="pay-btn" onclick="openPayModal()">💳 Proceed to Pay</button>
+    </div>
+  </div>
+
+  <!-- ── PAYMENT MODAL ── -->
+  <div class="pay-modal-overlay" id="payOverlay" onclick="closePayModal()"></div>
+  <div class="pay-modal" id="payModal">
+    <div class="modal-handle"></div>
+
+    <!-- Step 0: Choose method -->
+    <div id="stepChoose">
+      <div class="modal-title">Confirm Payment</div>
+      <div class="modal-sub">How is the customer paying?</div>
+      <div class="modal-bill-box">
+        <div class="mbl">Bill Amount</div>
+        <div class="mbv" id="modalAmt">₹0</div>
+      </div>
+      <div class="pay-methods">
+        <div class="pay-method-btn cash" onclick="showCashStep()">
+          <div class="pm-icon">💵</div>
+          <div class="pm-name">Cash</div>
+          <div class="pm-desc">Count &amp; change</div>
+        </div>
+        <div class="pay-method-btn gpay" onclick="showUpiStep()">
+          <div class="pm-icon">📱</div>
+          <div class="pm-name">GPay / UPI</div>
+          <div class="pm-desc">QR scan</div>
+        </div>
+      </div>
+      <div class="modal-cancel-row">
+        <button class="cancel-lnk" onclick="closePayModal()">✕ Cancel</button>
+      </div>
+    </div>
+
+    <!-- Step 1: Cash -->
+    <div id="stepCash" style="display:none">
+      <button class="step-back" onclick="backToChoose()">← Back</button>
+      <div class="modal-title" style="margin-bottom:16px">💵 Cash Payment</div>
+      <div class="step-body">
+        <div class="cash-bill-row">
+          <div class="cbl">Bill Amount</div>
+          <div class="cbv" id="cashBillAmt">₹0</div>
+        </div>
+        <div class="cash-input-label">Customer Gave (₹)</div>
+        <div class="cash-input-wrap">
+          <div class="rupee-prefix">₹</div>
+          <input class="cash-input" id="cashGiven" type="number" inputmode="numeric" placeholder="0" oninput="calcChange()"/>
+        </div>
+        <div class="quick-amounts" id="quickAmts"></div>
+        <div class="change-box zero" id="changeBox">
+          <div class="cb-label">Balance / Change</div>
+          <div class="cb-amount" id="changeAmt">₹0</div>
+          <div class="cb-sub" id="changeSub">Enter amount above</div>
+        </div>
+        <button class="confirm-cash-btn not-ready" id="confirmCashBtn" onclick="confirmPayment('cash')">
+          ✓ Confirm Cash Payment
+        </button>
+      </div>
+      <div style="height:16px"></div>
+    </div>
+
+    <!-- Step 2: UPI -->
+    <div id="stepUpi" style="display:none">
+      <button class="step-back" onclick="backToChoose()">← Back</button>
+      <div class="modal-title" style="margin-bottom:4px">📱 UPI Payment</div>
+      <div class="modal-sub">Customer scans QR below</div>
+      <div class="step-body">
+        <div class="qr-container">
+          <div class="qr-canvas-wrap">
+            <canvas id="qrCanvas" width="180" height="180"></canvas>
+          </div>
+          <div class="qr-amount-label">Scan to Pay</div>
+          <div class="qr-amount-val" id="upiAmtDisplay">₹0</div>
+          <div class="qr-upi-id" id="upiIdDisplay"></div>
+        </div>
+        <div class="upi-manual-section">
+          <div class="upi-manual-label">Enter amount customer paid (₹)</div>
+          <div class="upi-input-row">
+            <div class="upi-rupee">₹</div>
+            <input class="upi-amount-input" id="upiPaidInput" type="number" inputmode="numeric" placeholder="0" oninput="checkUpiAmount()"/>
+          </div>
+        </div>
+        <div class="upi-status-box">
+          <div class="upi-status-label">Payment Status</div>
+          <div class="upi-status-row">
+            <div class="upi-dot waiting" id="upiDot"></div>
+            <div class="upi-status-text" id="upiStatusText">Waiting for customer to scan…</div>
+          </div>
+        </div>
+        <button class="confirm-upi-btn not-ready" id="confirmUpiBtn" onclick="confirmPayment('gpay')">
+          ✓ Confirm UPI Payment
+        </button>
+        <div class="upi-note">
+          Type the exact amount received above.<br>Amount must match the bill to confirm.
+        </div>
+      </div>
+      <div style="height:16px"></div>
+    </div>
+  </div>
+
+  <!-- ── RECORDS PANEL ── -->
+  <div class="records-panel" id="recordsPanel">
+    <div class="rec-header">
+      <button class="back-btn" onclick="closeRecords()">←</button>
+      <div class="rec-title">Billing Records</div>
+      <button class="export-btn" onclick="exportExcel()">⬇ Excel</button>
+    </div>
+    <div class="rec-tabs">
+      <div class="rec-tab active" id="rtab-today" onclick="switchRecTab('today')">Today</div>
+      <div class="rec-tab" id="rtab-month" onclick="switchRecTab('month')">This Month</div>
+      <div class="rec-tab" id="rtab-all" onclick="switchRecTab('all')">All Bills</div>
+    </div>
+    <div class="rec-body" id="recBody"></div>
+  </div>
+
+  <!-- ── SUCCESS TOAST ── -->
+  <div class="toast" id="toast">
+    <div id="toastMsg">Payment Done!</div>
+    <div class="t-sub" id="toastSub">Thank you • Come again</div>
+  </div>
+
+  <!-- ── SCRIPTS ── -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

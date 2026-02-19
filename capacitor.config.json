@@ -1,0 +1,12 @@
+{
+  "appId": "com.roadstop.billing",
+  "appName": "RoadStop Billing",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": true,
+    "backgroundColor": "#0d0d0d"
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "RoadStop Hotel Billing",
+  "short_name": "RoadStop",
+  "description": "Fast roadside hotel billing app",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0d0d0d",
+  "theme_color": "#0d0d0d",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192x192/f5a623/000000?text=RS",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512/f5a623/000000?text=RS",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
