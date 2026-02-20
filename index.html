@@ -1,22 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>RoadStop — Hotel Billing</title>
-  <meta name="theme-color" content="#0d0d0d"/>
-  <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-  <link rel="manifest" href="manifest.json"/>
+  <meta name="theme-color" content="#0d0d0d" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="manifest.json" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
 
   <!-- ── HEADER ── -->
   <header>
-    <div class="logo">RoadStop<span>Hotel & Dining</span></div>
+    <div class="logo">Hotel<span>செல்லம்மாள் மெஸ் </span></div>
     <div class="header-right">
       <button class="hbtn records" onclick="openRecords()">📋 Records</button>
       <button class="hbtn" onclick="clearCart()">Clear</button>
@@ -100,7 +103,8 @@
         <div class="cash-input-label">Customer Gave (₹)</div>
         <div class="cash-input-wrap">
           <div class="rupee-prefix">₹</div>
-          <input class="cash-input" id="cashGiven" type="number" inputmode="numeric" placeholder="0" oninput="calcChange()"/>
+          <input class="cash-input" id="cashGiven" type="number" inputmode="numeric" placeholder="0"
+            oninput="calcChange()" />
         </div>
         <div class="quick-amounts" id="quickAmts"></div>
         <div class="change-box zero" id="changeBox">
@@ -133,7 +137,8 @@
           <div class="upi-manual-label">Enter amount customer paid (₹)</div>
           <div class="upi-input-row">
             <div class="upi-rupee">₹</div>
-            <input class="upi-amount-input" id="upiPaidInput" type="number" inputmode="numeric" placeholder="0" oninput="checkUpiAmount()"/>
+            <input class="upi-amount-input" id="upiPaidInput" type="number" inputmode="numeric" placeholder="0"
+              oninput="checkUpiAmount()" />
           </div>
         </div>
         <div class="upi-status-box">
@@ -179,4 +184,5 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="app.js"></script>
 </body>
+
 </html>

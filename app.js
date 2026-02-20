@@ -11,38 +11,64 @@ const UPI_NAME = 'RoadStop Hotel'; // ← PUT YOUR HOTEL NAME HERE
 /* ══════════════════════════════
    FOOD IMAGES (Wikimedia Commons — Free CC License)
 ══════════════════════════════ */
-const IMG = {
-  Poratta:     'images/poratta.jpg',
-  dosa:        'images/dosa.png',
-  chapathi:    'images/chappathi.png',
-  halfboil:   'images/halfboil.png',
-  fullboil:   'images/fullboil.jpg',
-  omelette:   'images/ombelette.jpg',
-  chickenrice:'images/chicken rice.webp',
-  Eggrice:    'images/egg rice.jpg',
+const IMG = { 
+  idli:         'images/idli.png',
+  dosa:         'images/dosa.png',
+  plaindosa:    'images/plain dosa.png',
+  masaladosa:   'images/masala dosa.png',
+  oniondosa:    'images/onion dosa.png',
+
+  poratta:      'images/poratta.jpg',
+  kothuporatta: 'images/kothuparotta.png',
+
+  halfboiled:   'images/halfboil.png',
+  omelette:     'images/ombelette.jpg',
+
+  eggveechu:    'images/eggveechu.jpg',
+  eggdosa:      'images/egg dosa.jpg',
+  eggfried:     'images/egg fried.jfif',
+  eggroast:     'images/egg roast.webp',
+  onionuthappam:'images/onion uthappam.webp',
+
+  chickenrice:  'images/chicken rice.webp',
+  eggrice:      'images/egg rice.jpg',
+  meals:        'images/meals.jfif',
+  kuska:        'images/kuska.jfif',
 };
 
 
-/* ══════════════════════════════
-   MENU DATA
-   To add/edit items: change name, price, imgKey here
-══════════════════════════════ */
 const menu = [
   {
     category: 'Foods',
     items: [
-      { id: 1,  name: 'Poratta',       price: 15,  imgKey: 'Poratta'     },
-      { id: 2,  name: 'Dosa',          price: 20,  imgKey: 'dosa'        },
-      { id: 3,  name: 'Chappathi',     price: 20,  imgKey: 'chapathi'    },
-      { id: 9,  name: 'Half Boil',     price: 10,  imgKey: 'halfboil'   },
-      { id: 10, name: 'Full Boil',     price: 10,  imgKey: 'fullboil'   },
-      { id: 11, name: 'Omelette',      price: 15,  imgKey: 'omelette'   },
-      { id: 14, name: 'Chicken Rice',  price: 90,  imgKey: 'chickenrice' },
-      { id: 15, name: 'Egg Rice',      price: 50,  imgKey: 'Eggrice'     },
-    ],
-  },
-];
 
+      { id: 1,  name: 'Idli',           price: 10, imgKey: 'idli' },
+      { id: 2,  name: 'Dosa',           price: 15, imgKey: 'dosa' },
+      { id: 3,  name: 'Plain Dosa',     price: 15, imgKey: 'plaindosa' },
+      { id: 4,  name: 'Masala Dosa',    price: 25, imgKey: 'masaladosa' },
+      { id: 5,  name: 'Onion Dosa',     price: 15, imgKey: 'oniondosa' },
+
+      { id: 6,  name: 'Poratta',        price: 15, imgKey: 'poratta' },
+      { id: 7,  name: 'Kothu Poratta',  price: 80, imgKey: 'kothuporatta' },
+
+      { id: 8,  name: 'Half Boiled',    price: 10, imgKey: 'halfboiled' },
+      { id: 9,  name: 'Omelette',       price: 15, imgKey: 'omelette' },
+
+      { id: 10, name: 'Egg Veechu',     price: 40, imgKey: 'eggveechu' },
+      { id: 11, name: 'Egg Dosa',       price: 30, imgKey: 'eggdosa' },
+      { id: 12, name: 'Egg Fried',      price: 50, imgKey: 'eggfried' },
+      { id: 13, name: 'Egg Roast',      price: 60, imgKey: 'eggroast' },
+
+      { id: 14, name: 'Onion Uthappam', price: 50, imgKey: 'onionuthappam' },
+
+      { id: 15, name: 'Chicken Rice',   price: 90, imgKey: 'chickenrice' },
+      { id: 16, name: 'Egg Rice',       price: 80, imgKey: 'eggrice' },
+      { id: 17, name: 'Meals',          price: 80, imgKey: 'meals' },
+      { id: 18, name: 'Kuska',          price: 70, imgKey: 'kuska' },
+
+    ],
+  }
+];
 /* ══════════════════════════════
    STATE
 ══════════════════════════════ */
