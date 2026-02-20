@@ -26,14 +26,14 @@ const IMG = {
 
   eggveechu:    'images/eggveechu.jpg',
   eggdosa:      'images/egg dosa.jpg',
-  eggfried:     'images/egg fried.jfif',
+  eggfried:     'images/egg fried.png',
   eggroast:     'images/egg roast.webp',
   onionuthappam:'images/onion uthappam.webp',
 
   chickenrice:  'images/chicken rice.webp',
   eggrice:      'images/egg rice.jpg',
-  meals:        'images/meals.jfif',
-  kuska:        'images/kuska.jfif',
+  meals:        'images/meals.png',
+  kuska:        'images/kuska.png',
 };
 
 
